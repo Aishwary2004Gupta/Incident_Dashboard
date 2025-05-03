@@ -114,8 +114,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Thanks to the React and TypeScript communities for their excellent documentation
 - Special thanks to the Tailwind CSS team for their amazing utility-first CSS framework
 
-## Contact
-
-Your Name - [@yourtwitter](https://twitter.com/yourtwitter)
-
-Project Link: [https://github.com/yourusername/ai-safety-dashboard](https://github.com/yourusername/ai-safety-dashboard)
