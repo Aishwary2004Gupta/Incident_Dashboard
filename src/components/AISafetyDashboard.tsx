@@ -8,20 +8,26 @@ const AISafetyDashboard: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [expandedIncident, setExpandedIncident] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [newIncident, setNewIncident] = useState({
     title: '',
     description: '',
     severity: 'Low' as Severity,
   });
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const storedMode = localStorage.getItem('theme');
-    return storedMode ? storedMode === 'dark' : false;
-  });
 
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  // Apply dark mode class to body
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   const filteredIncidents = incidents
     .filter(incident => filter === 'All' || incident.severity === filter)
@@ -48,36 +54,41 @@ const AISafetyDashboard: React.FC = () => {
 
   const getSeverityColor = (severity: Severity) => {
     switch (severity) {
-      case 'Low': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100';
-      case 'High': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100';
+      case 'Low': return 'bg-emerald-100 text-emerald-800';
+      case 'Medium': return 'bg-orange-100 text-orange-800';
+      case 'High': return 'bg-rose-100 text-rose-800';
     }
   };
 
   return (
-    <div className={`min-h-screen flex flex-col justify-center items-center px-4 py-8 transition-colors duration-500 ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-      
-      <div className="absolute top-4 right-4">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      <div className="container mx-auto px-6 py-10">
+        {/* Dark Mode Toggle Button */}
         <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-600 text-white hover:bg-purple-700 transition"
-          title={`Switch to ${darkMode ? 'Light' : 'Dark'} Mode`}
+          onClick={toggleDarkMode}
+          className="fixed top-4 right-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          aria-label="Toggle dark mode"
         >
-          {darkMode ? '🌞' : '🌙'}
+          {isDarkMode ? '☀️' : '🌙'}
         </button>
-      </div>
 
-      <div className="w-full max-w-4xl text-center">
-        <h1 className="text-3xl font-bold mb-6">AI Safety Incident Dashboard</h1>
+        <h1 className={`text-4xl font-extrabold mb-10 text-center ${isDarkMode ? 'text-white' : 'text-blue-800'}`}>
+          🌐 AI Safety Incident Dashboard
+        </h1>
 
-        <div className="flex flex-col md:flex-row gap-4 justify-center mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div>
+            <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Filter by Severity
+            </label>
             <select
-              className="p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+              className={`w-full p-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'border-gray-300'
+              }`}
               value={filter}
               onChange={(e) => setFilter(e.target.value as Severity | 'All')}
             >
-              <option value="All">All Severities</option>
+              <option value="All">All</option>
               <option value="Low">Low</option>
               <option value="Medium">Medium</option>
               <option value="High">High</option>
@@ -85,8 +96,13 @@ const AISafetyDashboard: React.FC = () => {
           </div>
 
           <div>
+            <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Sort by Date
+            </label>
             <select
-              className="p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+              className={`w-full p-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'border-gray-300'
+              }`}
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as SortOrder)}
             >
@@ -97,39 +113,58 @@ const AISafetyDashboard: React.FC = () => {
         </div>
 
         <button
-          className="mb-6 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          className={`mb-8 px-6 py-3 rounded-xl font-medium transition-transform transform hover:scale-105 ${
+            isDarkMode ? 'bg-blue-700 hover:bg-blue-600' : 'bg-blue-600 hover:bg-blue-700'
+          } text-white`}
           onClick={() => setShowForm(!showForm)}
         >
-          {showForm ? 'Cancel' : 'Report New Incident'}
+          {showForm ? 'Cancel' : '➕ Report New Incident'}
         </button>
 
         {showForm && (
-          <form onSubmit={handleSubmit} className="mb-8 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 text-left">
-            <h2 className="text-xl font-semibold mb-4">Report New Incident</h2>
-            <div className="space-y-4">
+          <form onSubmit={handleSubmit} className={`mb-10 p-6 border-2 rounded-xl shadow-lg ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+          }`}>
+            <h2 className={`text-2xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-blue-700'}`}>
+              📝 Report New Incident
+            </h2>
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-1">Title</label>
+                <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Title
+                </label>
                 <input
                   type="text"
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                  className={`w-full p-3 border-2 rounded-lg ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                  }`}
                   value={newIncident.title}
                   onChange={(e) => setNewIncident({ ...newIncident, title: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
+                <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Description
+                </label>
                 <textarea
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                  className={`w-full p-3 border-2 rounded-lg ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                  }`}
+                  rows={4}
                   value={newIncident.description}
                   onChange={(e) => setNewIncident({ ...newIncident, description: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Severity</label>
+                <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Severity
+                </label>
                 <select
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                  className={`w-full p-3 border-2 rounded-lg ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                  }`}
                   value={newIncident.severity}
                   onChange={(e) => setNewIncident({ ...newIncident, severity: e.target.value as Severity })}
                 >
@@ -140,42 +175,50 @@ const AISafetyDashboard: React.FC = () => {
               </div>
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                className="px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-transform transform hover:scale-105"
               >
-                Submit Incident
+                ✅ Submit Incident
               </button>
             </div>
           </form>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {filteredIncidents.map((incident) => (
             <div
               key={incident.id}
-              className="border rounded-lg p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 text-left"
+              className={`border-2 rounded-xl p-6 shadow-md hover:shadow-lg transition-all ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+              }`}
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="text-xl font-semibold">{incident.title}</h3>
+                  <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {incident.title}
+                  </h3>
                   <div className="flex items-center gap-4 mt-2">
-                    <span className={`px-2 py-1 rounded-full text-sm ${getSeverityColor(incident.severity)}`}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getSeverityColor(incident.severity)}`}>
                       {incident.severity}
                     </span>
-                    <span className="text-gray-500 dark:text-gray-400">
-                      {new Date(incident.reported_at).toLocaleDateString()}
+                    <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      📅 {new Date(incident.reported_at).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
                 <button
-                  className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-600"
+                  className={`font-medium ${
+                    isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'
+                  }`}
                   onClick={() => setExpandedIncident(expandedIncident === incident.id ? null : incident.id)}
                 >
-                  {expandedIncident === incident.id ? 'Hide Details' : 'View Details'}
+                  {expandedIncident === incident.id ? '▲ Hide' : '▼ View'}
                 </button>
               </div>
               {expandedIncident === incident.id && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-md dark:bg-gray-700">
-                  <p className="text-gray-700 dark:text-gray-200">{incident.description}</p>
+                <div className={`mt-4 p-4 rounded-lg border ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-200 text-gray-700'
+                }`}>
+                  {incident.description}
                 </div>
               )}
             </div>
